@@ -1,0 +1,9 @@
+// An example of a program in the GoLike language
+var x float = 7.5;
+var c float = x - 3;
+scan(&c);
+if x < c {
+    println(x);
+} else {
+    println(15);
+}

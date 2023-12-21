@@ -1,0 +1,51 @@
+.target: Postfix Machine
+.version: 0.2
+
+
+.vars(
+   x   float
+   c   float
+)
+
+
+.labels(
+   m1   20
+   m2   24
+)
+
+
+.constants(
+   7.5   float
+   3   int
+   15   int
+)
+
+
+.code(
+   x   l-val
+   7.5   float
+   =   assign_op
+   c   l-val
+   x   r-val
+   3   int
+   -   add_op
+   =   assign_op
+   c   l-val
+   IN   in_op
+   =   assign_op
+   x   r-val
+   c   r-val
+   <   rel_op
+   m1   label
+   JF   jf
+   x   r-val
+   OUT   out_op
+   m2   label
+   JMP   jump
+   m1   label
+   :   colon
+   15   int
+   OUT   out_op
+   m2   label
+   :   colon
+)
