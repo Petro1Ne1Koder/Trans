@@ -1,4 +1,4 @@
-from my_lang_lex import lex, tableOfSymb  # , tableOfVar, tableOfConst
+from parse import lex, tableOfSymb  # , tableOfVar, tableOfConst
 
 lex()
 print('-' * 30)
