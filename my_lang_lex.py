@@ -42,7 +42,7 @@ tokenTable = {
     '.': 'dot',
     ' ': 'ws',
     '\t': 'ws',
-    '\n': 'nl',
+    '\n': 'eol',
     'float': 'keyword',
     'int': 'keyword',
     'bool': 'keyword',
