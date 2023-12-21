@@ -22,6 +22,11 @@ tableOfLabel = {}
 # parseProgram()
 def parseProgram():
     print('parseProgram():')
+    parseToken('program', 'keyword', '\t')
+    if not parseToken('myprogram', 'ident', '\t'):
+        failParse("відсутній ідентифікатор програми", (numRow, 'program'))
+    parseToken('{', 'punct', '\t')
+
     if tableOfSymb:
         while parseStatement():
             pass
@@ -31,7 +36,6 @@ def parseProgram():
         print('Parser: Синтаксичний аналіз і семантичний аналіз завершився успішно')
     else:
         print('Parser: Синтаксичний аналіз і семантичний аналіз завершився успішно')
-
 def parseStatement():
     print('\t\tparseStatement():')
     # прочитаємо поточну лексему в таблиці розбору
@@ -40,16 +44,13 @@ def parseStatement():
     # обробити інструкцію присвоювання
 
 
-    if (lex, tok) == ('program', 'keyword'):
-        parseInit()
-        return True
-    elif tok == 'ident':
+    if tok == 'ident':
         parseSimplestmt()
         return True
     # if tok ==  'ident':
     #     parseExpression()
     # обробка оголошення змінної
-    elif (lex, tok) == ('var', 'keyword'):
+    elif (lex, tok) == ('int', 'keyword') or (lex, tok) == ('float', 'keyword') or (lex, tok) == ('bool', 'keyword'):
         parseVar()
         return True
 
@@ -78,16 +79,6 @@ def parseStatement():
         # жодна з інструкцій не відповідає
         # поточній лексемі у таблиці розбору,
         return False
-        
-
-def parseInit():
-    global numRow
-    numTabs = 0
-    print('\t' * 5 + 'parseInit():')
-    parseToken('program', 'keyword', '\t' * 7)
-    if not parseToken('ident', numTabs, 'program'):
-        failParse("відсутній ідентифікатор програми", (numRow, 'program'))
-    return True
 
 def getSymb():
     global numRow
@@ -359,10 +350,71 @@ def parseFactorforPow():
     return True
 
 
+# def parseVar():
+#     global numRow
+#     print('\t' * 7 + 'parseVar():')
+#     numLine, typeIdent, tok = getSymb()
+#     parseToken(typeIdent, 'keyword', '\t' * 7)
+#     numLine, ident, tok = getSymb()
+#     if tok == 'ident':
+#         if ident in TableOfIdents:
+#             failParse('Змінна вже оголошена',numLine)
+#         else:
+#             numRow += 1
+#             print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (ident, tok)))
+#             numLine, typeIdent, tok = getSymb()
+#             if typeIdent in ('int', 'float', 'bool'):
+#                 numRow += 1
+#                 print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (typeIdent, tok)))
+#                 # postfixCodeGen('lval', (ident, tok))
+#                 # postfixCodeCLR.append(f'   ldloca    {ident}')
+#                 numLine, lex, tok = getSymb()
+#                 if lex == '=':
+#                     numRow += 1
+#                     numRowForSem = numRow
+#                     print(numRowForSem)
+#                     print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, tok)))
+#                     parseExpression()
+#                     Expression = parseExpressionForAssign(typeIdent, numRowForSem)
+#                     try:
+#                         value = eval(Expression)
+#                     except ZeroDivisionError:
+#                          failParse('Ділення на 0', numLine)
+#                     addToTableOfIdents(ident, typeIdent, value, numLine)
+#                     postfixCodeGen('assign_op', ('=', 'assign_op'))
+#                     if typeIdent == 'int':
+#                         postfixCodeCLR.append(f'   stind.i4')
+#                     else:
+#                         postfixCodeCLR.append(f'   stind.r4')
+#                     parseToken(';','punct','')
+#                     return True
+#                 # else:
+#                 #     if typeIdent == 'bool':
+#                 #         TableOfIdents[ident] = [typeIdent, 'False']
+#                 #         postfixCodeGen('const', ('False', 'bool'))
+#                 #     elif typeIdent == 'float':
+#                 #         TableOfIdents[ident] = [typeIdent, 0.0]
+#                 #         postfixCodeGen('const', ('0.0', 'float'))
+#                 #     elif typeIdent == 'int':
+#                 #         TableOfIdents[ident] = [typeIdent, 0]
+#                 #         postfixCodeGen('const', ('0', 'int'))
+#                 #     postfixCodeGen('assign_op', ('=', 'assign_op'))
+#                 #     if typeIdent == 'int':
+#                 #         postfixCodeCLR.append(f'   stind.i4')
+#                 #     else:
+#                 #         postfixCodeCLR.append(f'   stind.r4')
+#                 #     parseToken(';','punct','')
+#                 #     return True
+#             else:
+#                 failParse('Після назви змінної має бути int | float | bool', numLine)
+#     else:
+#         failParse('Очікувалась назва змінної', numLine)
+
 def parseVar():
     global numRow
     print('\t' * 7 + 'parseVar():')
-    parseToken('var', 'keyword', '\t' * 7)
+    numLine, typeIdent, tok = getSymb()
+    parseToken(typeIdent, 'keyword', '\t' * 7)
     numLine, ident, tok = getSymb()
     if tok == 'ident':
         if ident in TableOfIdents:
@@ -370,53 +422,54 @@ def parseVar():
         else:
             numRow += 1
             print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (ident, tok)))
-            numLine, typeIdent, tok = getSymb()
-            if typeIdent in ('int', 'float', 'bool'):
+            # numLine, typeIdent, tok = getSymb()
+            # if typeIdent in ('int', 'float', 'bool'):
+            numRow += 1
+            print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (typeIdent, tok)))
+            postfixCodeGen('lval', (ident, tok))
+            postfixCodeCLR.append(f'   ldloca    {ident}')
+            numLine, lex, tok = getSymb()
+            if lex == '=':
                 numRow += 1
-                print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (typeIdent, tok)))
-                postfixCodeGen('lval', (ident, tok))
-                postfixCodeCLR.append(f'   ldloca    {ident}')
-                numLine, lex, tok = getSymb()
-                if lex == '=':
-                    numRow += 1
-                    numRowForSem = numRow
-                    print(numRowForSem)
-                    print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, tok)))
-                    parseExpression()
-                    Expression = parseExpressionForAssign(typeIdent, numRowForSem)
-                    try:
-                        value = eval(Expression)
-                    except ZeroDivisionError:
-                         failParse('Ділення на 0', numLine)
-                    addToTableOfIdents(ident, typeIdent, value, numLine)
-                    postfixCodeGen('assign_op', ('=', 'assign_op'))
-                    if typeIdent == 'int':
-                        postfixCodeCLR.append(f'   stind.i4')
-                    else:
-                        postfixCodeCLR.append(f'   stind.r4')  
-                    parseToken(';','punct','')
-                    return True
+                numRowForSem = numRow
+                print(numRowForSem)
+                print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, tok)))
+                parseExpression()
+                Expression = parseExpressionForAssign(typeIdent, numRowForSem)
+                try:
+                    value = eval(Expression)
+                except ZeroDivisionError:
+                     failParse('Ділення на 0', numLine)
+                addToTableOfIdents(ident, typeIdent, value, numLine)
+                postfixCodeGen('assign_op', ('=', 'assign_op'))
+                if typeIdent == 'int':
+                    postfixCodeCLR.append(f'   stind.i4')
                 else:
-                    if typeIdent == 'bool':
-                        TableOfIdents[ident] = [typeIdent, 'False']
-                        postfixCodeGen('const', ('False', 'bool'))
-                    elif typeIdent == 'float':
-                        TableOfIdents[ident] = [typeIdent, 0.0]
-                        postfixCodeGen('const', ('0.0', 'float'))
-                    elif typeIdent == 'int':
-                        TableOfIdents[ident] = [typeIdent, 0]
-                        postfixCodeGen('const', ('0', 'int'))
-                    postfixCodeGen('assign_op', ('=', 'assign_op'))
-                    if typeIdent == 'int':
-                        postfixCodeCLR.append(f'   stind.i4')
-                    else:
-                        postfixCodeCLR.append(f'   stind.r4')  
-                    parseToken(';','punct','')
-                    return True
-            else:
-                failParse('Після назви змінної має бути int | float | bool', numLine)
+                    postfixCodeCLR.append(f'   stind.r4')
+                parseToken(';','punct','')
+                return True
+                # else:
+                #     if typeIdent == 'bool':
+                #         TableOfIdents[ident] = [typeIdent, 'False']
+                #         postfixCodeGen('const', ('False', 'bool'))
+                #     elif typeIdent == 'float':
+                #         TableOfIdents[ident] = [typeIdent, 0.0]
+                #         postfixCodeGen('const', ('0.0', 'float'))
+                #     elif typeIdent == 'int':
+                #         TableOfIdents[ident] = [typeIdent, 0]
+                #         postfixCodeGen('const', ('0', 'int'))
+                #     postfixCodeGen('assign_op', ('=', 'assign_op'))
+                #     if typeIdent == 'int':
+                #         postfixCodeCLR.append(f'   stind.i4')
+                #     else:
+                #         postfixCodeCLR.append(f'   stind.r4')
+                #     parseToken(';','punct','')
+                #     return True
+            # else:
+            #     failParse('Після назви змінної має бути int | float | bool', numLine)
     else:
         failParse('Очікувалась назва змінної', numLine)
+
 
 
 def parseSimplestmt():

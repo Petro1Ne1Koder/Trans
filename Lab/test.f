@@ -1,5 +1,8 @@
 program myprogram {
-    int a, b, c;
+    int a;
+    a = 5;
+    int b;
+    int c;
     float x;
     int i;
     bool y;
