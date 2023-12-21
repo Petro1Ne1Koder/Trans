@@ -1,249 +1,501 @@
-tokenTable = {
-    'program': 'keyword',
-    'True': 'boolconst',
-    'False': 'boolconst',
-    'bool': 'keyword',
-    'if': 'keyword',
-    'else': 'keyword',
-    'while': 'keyword',
-    'output': 'keyword',
-    'input': 'keyword',
-    ':=': 'assign_op',
-    '=': 'assign_op',
-    '+=': 'assign_op',
-    '-=': 'assign_op',
-    '*=': 'assign_op',
-    '/=': 'assign_op',
-    '%=': 'assign_op',
-    '^=': 'assign_op',
-    '+': 'add_op',
-    '-': 'add_op',
-    '*': 'mul_op',
-    '/': 'mul_op',
-    '%': 'mul_op',
-    '^': 'pow_op',
-    '++': 'post_op',
-    '--': 'post_op',
-    '==': 'rel_op',
-    '!=': 'rel_op',
-    '>': 'rel_op',
-    '>=': 'rel_op',
-    '<': 'rel_op',
-    '<=': 'rel_op',
-    '(': 'brackets_op',
-    ')': 'brackets_op',
-    '{': 'punct',
-    '}': 'punct',
-    '&': 'punct',
-    ',': 'punct',
-    ';': 'punct',
-    '"': 'quotes',
-    '//': 'comment',
-    '.': 'dot',
-    ' ': 'ws',
-    '\t': 'ws',
-    '\n': 'nl',
-    'float': 'keyword',
-    'int': 'keyword',
-    'bool': 'keyword',
-}
+from my_lang_lex import lex
+from my_lang_lex import tableOfSymb  # , tableOfVar, tableOfConst
 
-tokStateTable = {2: 'ident', 6: 'float', 8: 'int'}
+lex()
+print('-' * 30)
+print('tableOfSymb:{0}'.format(tableOfSymb))
+print('-' * 30)
+tableOfIdent = {}
 
-stf = {
-    (0, 'Letter'): 1, (1, 'Letter'): 1, (1, 'Digit'): 1, (1, 'other'): 2,
-    (0, 'ws'): 0,
-    (0, 'Digit'): 3, (3, 'Digit'): 3, (3, 'dot'): 4, (4, 'Digit'): 5, (5, 'Digit'): 5, (5, 'other'): 6,
-    (4, 'other'): 104, (3, 'other'): 8,
-    (0, '/'): 9, (9, '/'): 10, (9, 'other'): 11, (9, '='): 19, (10, 'NotNewLine'): 10, (10, 'nl'): 50,
-    (0, '^'): 12, (0, '>'): 12, (0, '<'): 12, (0, '%'): 12, (0, '*'): 12, (12, 'other'): 13, (12, '='): 19,
-    (0, ':'): 14, (14, 'other'): 101, (14, '='): 19,
-    (0, '-'): 15, (15, '-'): 16, (15, 'other'): 17, (15, '='): 19,
-    (0, '='): 18, (18, 'other'): 20, (18, '='): 19,
-    (0, '+'): 21, (21, 'other'): 23, (21, '+'): 22, (21, '='): 19,
-    (0, '!'): 24, (24, 'other'): 102, (24, '='): 25,
-    (0, 'other'): 103,
-    (0, ';'): 26, (0, ','): 26, (0, '('): 26, (0, ')'): 26, (0, '{'): 26, (0, '}'): 26, (0, '&'): 26,
-    (0, 'nl'): 27,
-}
+# номер рядка таблиці розбору/лексем/символів ПРОГРАМИ tableOfSymb
+numRow = 1
 
-initState = 0
-F = {2, 6, 8, 11, 13, 19, 20, 22, 23, 25, 26, 27, 16, 17, 101, 102, 103, 104, 50}
-Fstar = {2, 6, 8, 13, 17, 20, 23, 50}
-Ferror = {101, 102, 103, 104}
+# довжина таблиці символів програми
+# він же - номер останнього запису
+len_tableOfSymb = len(tableOfSymb)
+print(('len_tableOfSymb', len_tableOfSymb))
 
-tableOfId = {}
-tableOfConst = {}
-tableOfSymb = {}
+costyl = 1
+# Функція для розбору за правилом
+# Program = program StatementList end
+# читає таблицю розбору tableOfSymb
 
-state = initState
-
-f = open('test.f', 'r')
-sourceCode = f.read()
-sourceCode += '\n'
-f.close()
-
-FSuccess = (True, 'Lexer')
-
-lenCode = len(sourceCode) - 1
-numLine = 1
-numChar = -1
-char = ''
-lexeme = ''
-
-
-def lex():
-    global state, numLine, char, lexeme, numChar, FSuccess
+def parseProgram():
     try:
-        while numChar < lenCode:
-            char = nextChar()
-            classCh = classOfChar(char, state)
-            state = nextState(state, classCh)
-            if is_final(state):
-                processing()
-            elif state == initState:
-                lexeme = ''
-            else:
-                lexeme += char
-        print('\033[32mLexer: Лексичний аналіз завершено успішно\033[0m')
+        numTabs = 0
+        # перевірити наявність ключового слова 'program'
+        parseToken('keyword', numTabs, 'program')
+        if not parseToken('ident', numTabs, type="program"):
+            failParse("відсутній ідентифікатор програми", (numRow, 'program'))
+        parseToken('brackets_op', numTabs, '{')
+
+        parseToken("eol", numTabs, "\n")
+
+        parseDeclarList(numTabs)
+        parseToken("eol", numTabs, "\n")
+        parseDoSection(numTabs)
+        # перевірити синтаксичну коректність списку інструкцій StatementList
+        # parseStatementList()
+
+        parseToken('brackets_op', numTabs, '}')
+
+        # повідомити про синтаксичну коректність програми
+        print('Parser: Синтаксичний аналіз завершився успішно')
+        print(tableOfIdent)
+        return True
     except SystemExit as e:
-        FSuccess = (False, 'Lexer')
-        print(f'\033[31mLexer: Аварійне завершення програми з кодом {e}\033[0m')
+        # Повідомити про факт виявлення помилки
+        print('Parser: Аварійне завершення програми з кодом {0}'.format(e))
 
 
-def processing():
-    global state, lexeme, char, numLine, numChar, tableOfSymb
-    if state == 27:  # \n
-        numLine += 1
-        state = initState
-    if state in (2, 6, 8):
-        token = getToken(state, lexeme)
-        if token != 'keyword':
-            index = indexIdConst(state, lexeme)
-            print(f'{numLine:<3d} {lexeme:<10s} {token:<10s} {index:<2d}')
-            tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, index)
+# Функція перевіряє, чи у поточному рядку таблиці розбору
+# зустрілась вказана лексема lexeme з токеном token
+# параметр indent - відступ при виведенні у консоль
+def parseToken(token, indent, lexeme=None, type=None):
+    # доступ до поточного рядка таблиці розбору
+    global numRow, tableOfIdent
+    # якщо всі записи таблиці розбору прочитані,
+    # а парсер ще не знайшов якусь лексему
+    if numRow > len_tableOfSymb:
+        failParse('неочікуваний кінець програми', (lexeme, token, numRow))
+
+    # прочитати з таблиці розбору
+    # номер рядка програми, лексему та її токен
+    numLine, lex, tok = getSymb()
+
+    # чи збігаються лексема та токен таблиці розбору з заданими
+    if lexeme:
+        # тепер поточним буде наступний рядок таблиці розбору
+        numRow += 1
+
+        if (lex, tok) == (lexeme, token):
+            # вивести у консоль номер рядка програми та лексему і токен
+
+            print(
+                "  " * indent + 'parseToken: В рядку {0} токен {1}'.format(numLine, (lexeme, token)))
+            return True
         else:
-            print(f'{numLine:<3d} {lexeme:<10s} {token:<10s}')
-            tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, '')
-        lexeme = ''
-        numChar = putCharBack(numChar)
-        state = initState
-    if state in (11, 13, 17, 20, 23):
-        token = getToken(state, lexeme)
-        print(f'{numLine:<3d} {lexeme:<10s} {token:<10s}')
-        numChar = putCharBack(numChar)
-        tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, '')
-        lexeme = ''
-        state = initState
-    if state in (19, 16, 22, 25, 26):
-        lexeme += char
-        token = getToken(state, lexeme)
-        print(f'{numLine:<3d} {lexeme:<10s} {token:<10s}')
-        tableOfSymb[len(tableOfSymb) + 1] = (numLine, lexeme, token, '')
-        lexeme = ''
-        state = initState
-    if state == 50:
-        numChar = putCharBack(numChar)
-        token = 'comment'
-        lexeme = '//'
-        print(f'{numLine:<3d} {lexeme:10s} {token:10s}')
-        tableOfSymb[len(tableOfSymb) + 1] = (numLine, '//', 'comment', '')
-        lexeme = ''
-        state = initState
-    if state in Ferror:
-        fail()
+            # згенерувати помилку та інформацію про те, що
+            # лексема та токен таблиці розбору (lex,tok) відрізняються від
+            # очікуваних (lexeme,token)
+            failParse('невідповідність токенів',
+                      (numLine, lex, tok, lexeme, token))
+            return False
+    else:
+        if type:
+            tableOfIdent[lex] = type
+        if (tok) == (token):
+            # тепер поточним буде наступний рядок таблиці розбору
+            numRow += 1
+
+            if token == "ident":
+                try:
+                    print(
+                        "  " * indent + 'parseToken: В рядку {0} токен {1}'.format(numLine,
+                                                                                   (lex, token, tableOfIdent[lex])))
+                except KeyError:
+                    failParse("недекларований ідентифікатор", (indent, lex))
+            else:
+                print(
+                    "  " * indent + 'parseToken: В рядку {0} токен {1}'.format(numLine, (lex, token)))
+
+            return True
+        else:
+            return False
 
 
-def fail():
-    global state, numLine, char
-    if state == 101:
-        print(f'\033[31mLexer: у рядку {numLine}, очікувався символ = після ":", а не {char}\033[0m')
-        exit(101)
-    if state == 102:
-        print(f'\033[31mLexer: у рядку {numLine}, очікувався символ = після "!", а не {char}\033[0m')
-        exit(102)
-    if state == 103:
-        print(f'\033[31mLexer: у рядку {numLine} невідомий символ {char}\033[0m')
-        exit(103)
-    if state == 104:
-        print(f'\033[31mLexer: у рядку {numLine} очікувався Digit після крапки\033[0m')
-        exit(104)
+# Прочитати з таблиці розбору поточний запис
+# Повертає номер рядка програми, лексему та її токен
+def getSymb():
+    if numRow > len_tableOfSymb:
+        failParse('getSymb(): неочікуваний кінець програми', numRow)
+    # таблиця розбору реалізована у формі словника (dictionary)
+    # tableOfSymb[numRow]={numRow: (numLine, lexeme, token, indexOfVarOrConst)
+    numLine, lexeme, token, _ = tableOfSymb[numRow]
+    return numLine, lexeme, token
 
 
-def is_final(state):
-    if state in F:
+# Обробити помилки
+# вивести поточну інформацію та діагностичне повідомлення
+
+def failParse(str, tuple):
+    if str == 'невідповідність токенів':
+        (numLine, lexeme, token, lex, tok) = tuple
+        print('Parser ERROR: \n   В рядку {0} неочікуваний елемент ({1},{2}). \n   Очікувався - ({3},{4}).'.format(
+            numLine, lexeme, token, lex, tok))
+        exit(1)
+    elif str == 'неочікуваний кінець програми':
+        (lexeme, token, numRow) = tuple
+        print(
+            'Parser ERROR: \n   Неочікуваний кінець програми - в таблиці символів (розбору) немає запису з номером {1}. \n   Очікувалось - {0}'.format(
+                (lexeme, token), numRow))
+        exit(2)
+    elif str == 'getSymb(): неочікуваний кінець програми':
+        numRow = tuple
+        print(
+            'Parser ERROR: \n   Неочікуваний кінець програми - в таблиці символів (розбору) немає запису з номером {0}. \n   Останній запис - {1}'.format(
+                numRow, tableOfSymb[numRow - 1]))
+        exit(3)
+    elif str == 'помилка зчитування ідентифікаторів':
+        (numLine) = tuple
+        print(
+            f"Parser Error: \n   В рядку {numLine} очікувався список ідентифікаторів")
+        exit(4)
+    elif str == 'неочікувані дані':
+        (numLine, location) = tuple
+        print(
+            f"Parser Error: \n  В рядку {numLine} очікувався {location}")
+        exit(5)
+    elif str == 'недекларований ідентифікатор':
+        (numLine, identificator_name) = tuple
+        print(
+            f"Parser Error: \n  В рядку {numLine} недекларована змінна {identificator_name}")
+        exit(6)
+    elif str == 'неправильний boolexpr':
+        (numLine, identificator_name) = tuple
+        print(
+            f"Parser Error: \n  В рядку {numLine} очікувався {identificator_name}")
+        exit(7)
+    elif str == 'неочікуваний boolexpr':
+        (numLine, identificator_name) = tuple
+        print(
+            f"Parser Error: \n  В рядку {numLine} очікувався {identificator_name}")
+        exit(8)
+    elif str == 'відсутній ідентифікатор програми':
+        (numLine, identificator_name) = tuple
+        print(
+            f"Parser Error: \n  В рядку {numLine} очікувався ідентифікатор типу {identificator_name}")
+        exit(9)
+
+
+def parseDeclarList(indent):
+    global numRow
+    indent += 1
+    print("  " * indent + "parseDeclarList():")
+    while parseDeclar(indent):
+        pass
+    return True
+
+
+def parseDeclar(indent):
+    indent += 1
+    numLine, lex, tok = getSymb()
+
+    if lex in ('int', 'float', 'bool') and tok == "keyword":
+        print("  " * indent + "parseDeclar():")
+        parseType(indent, numLine, lex, tok)
+        parseToken("punct", indent + 2, ";")
+        parseToken("eol", indent, "\n")
+
         return True
     else:
         return False
 
 
-def nextState(state, classCh):
-    try:
-        return stf[(state, classCh)]
-    except KeyError:
-        return stf[(state, 'other')]
+def parseType(indent, numLine, lex, tok):
+    global numRow
+    numRow += 1
+    indent += 1
+    print("  " * indent + "parseType(): " +
+          'в рядку {0} - {1}'.format(numLine, (lex, tok)))
+    if not parseIdentList(indent, lex):
+        failParse('неочікуваний ввід', (numLine, "Declaration"))
+    return True
 
 
-def nextChar():
-    global numChar
-    numChar += 1
-    return sourceCode[numChar]
+def parseIdentList(indent, type=None):
+    indent += 1
+    print("  " * indent + "parseIdentList():")
+    if not parseToken('ident', indent + 1, type=type):
+        return False
+
+    numLine, lex, tok = getSymb()
+    while tok == "punct" and lex == ",":
+        parseToken('punct', indent + 1, ',')
+        parseToken('ident', indent + 1, type=type)
+        numLine, lex, tok = getSymb()
+    return True
 
 
-def putCharBack(numChar):
-    return numChar - 1
+def parseDoSection(indent):
+    indent += 1
+    print("  " * indent + "parseDoSection():")
+    parseStatementList(indent)
+    return True
 
 
-def classOfChar(char, state):
-    if state == 10:
-        if char not in '\n':
-            return 'NotNewLine'
-        else:
-            return 'nl'
-    if char in '.':
-        res = 'dot'
-    elif char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_':
-        res = 'Letter'
-    elif char in '0123456789':
-        res = 'Digit'
-    elif char in ' \t':
-        res = 'ws'
-    elif char in '\n':
-        res = 'nl'
-    elif char in '+-:=*/()><!^}{%,;&"':
-        res = char
+def parseStatementList(indent):
+    indent += 1
+    print("  " * indent + "parseStatementList():")
+    while parseStatement(indent):
+        parseToken("eol", indent, "\n")
+
+    return True
+
+
+def parseStatement(indent):
+    indent += 1
+    print("  " * indent + "parseStatement():")
+    numLine, lex, tok = getSymb()
+
+    # перевірка
+
+    indent += 1
+    if tok == 'ident':
+        parseAssign(indent)
+        return True
+    elif (lex, tok) == ('input', 'keyword'):
+        parseInput(indent)
+        return True
+    elif (lex, tok) == ('output', 'keyword'):
+        parseOutput(indent)
+        return True
+    elif (lex, tok) == ('if', 'keyword'):
+        parseIf(indent)
+        return True
+    elif (lex, tok) == ('while', 'keyword'):
+        parseWhile(indent)
+        return True
+    return False
+
+
+def parseIf(indent):
+    indent += 1
+    print("  " * indent + "parseIf():")
+    if parseToken("keyword", indent, "if"):
+        parseToken('brackets_op', indent, '(')
+        parseBoolExpression(indent + 2)
+        parseToken('brackets_op', indent, ')')
+        parseToken('brackets_op', indent, '{')
+        parseToken("eol", indent, "\n")
+        parseDoSection(indent)
+        parseToken('brackets_op', indent, '}')
+        return True
     else:
-        res = 'символ не належить алфавіту'
-    return res
+        return False
+
+def parseElif(indent):
+    indent += 1
+    print("  " * indent + "parseElif():")
+    if parseToken("keyword", indent, "elif"):
+        parseToken('brackets_op', indent, '(')
+        parseBoolExpression(indent + 2)
+        parseToken('brackets_op', indent, ')')
+        parseToken('brackets_op', indent, '{')
+        parseToken("eol", indent, "\n")
+        parseDoSection(indent)
+        parseToken('brackets_op', indent, '}')
+        return True
+    else:
+        return False
 
 
-def getToken(state, lexeme):
-    try:
-        return tokenTable[lexeme]
-    except KeyError:
-        return tokStateTable[state]
+def parseWhile(indent):
+    indent += 1
+    print("  " * indent + "parseWhile():")
+    if parseToken("keyword", indent, "while"):
+        parseToken('brackets_op', indent, '(')
+        parseBoolExpression(indent + 2)
+        parseToken('brackets_op', indent, ')')
+        parseToken('brackets_op', indent, '{')
+        parseToken("eol", indent, "\n")
+        parseDoSection(indent)
+        parseToken('brackets_op', indent, '}')
+
+        parseDoSection(indent)
+        return True
+    else:
+        return False
 
 
-def indexIdConst(state, lexeme):
-    indx = 0
-    if state == 2:
-        indx = tableOfId.get(lexeme)
-        if indx is None:
-            indx = len(tableOfId) + 1
-            tableOfId[lexeme] = indx
-    if state in (6, 8):
-        indx = tableOfConst.get(lexeme)
-        if indx is None:
-            indx = len(tableOfConst) + 1
-            tableOfConst[indx] = (tokStateTable[state], lexeme)
-    return indx
+def parseInput(indent):
+    indent += 1
+    numLine = getSymb()
+    print("  " * indent + "parseInput():")
+    indent += 1
+    parseToken("keyword", indent, "input")
+    parseToken("brackets_op", indent, "(")
+    if not parseIdentList(indent):
+        failParse('неочікуваний ввід', (numLine, "input"))
+    parseToken("brackets_op", indent, ")")
+    parseToken("punct", indent, ";")
+    return True
 
 
-lex()
-print('-' * 50)
+def parseOutput(indent):
+    indent += 1
+    numLine = getSymb()
+    print("  " * indent + "parseOutput():")
+    parseToken("keyword", indent, "output")
+    parseToken("brackets_op", indent, "(")
+    if not parseIdentList(indent):
+        failParse('неочікуваний ввід', (numLine, "output"))
+    parseToken("brackets_op", indent, ")")
+    parseToken("punct", indent, ";")
+    return True
 
-print(f'tableOfSymb: {tableOfSymb}\n')
-print(f'tableOfId: {tableOfId}\n')
-print(f'tableOfConst: {tableOfConst}\n')
+
+def parseAssign(indent):
+    print("  " * indent + "parseAssign():")
+    indent += 1
+    parseToken('ident', indent)
+    if parseToken('assign_op', indent, '='):
+        parseExpression(indent)
+        parseToken("punct", indent + 2, ";")
+        return True
+    else:
+        # error
+        numLine = getSymb()
+        failParse('неочікувані дані', (numLine, "assign statement"))
 
 
+def parseExpression(indent):
+    global numRow
+    print("  " * indent + "parseExpression():")
+    indent += 1
+    count = numRow
+    if parseBoolExpression(indent):
+        return True
+    numRow = count
+    if parseArithmExpression(indent):
+        return True
+    else:
+        # error
+        numLine = getSymb()
+        failParse('неочікувані дані', (numLine, "assign statement"))
+
+
+def parseBoolExpression(indent):
+    global tableOfIdent
+    print("  " * indent + "parseBoolExpression():")
+    numLine, lex, tok = getSymb()
+    indent += 1
+    if parseToken("boolconst", indent) or tableOfIdent.get(lex, False) == "bool":
+        if tableOfIdent.get(lex, False) == "bool":
+            parseToken("ident", indent)
+        numLine, lex, tok = getSymb()
+        if parseToken("rel_op", indent):
+            numLine, lex, tok = getSymb()
+            if tok == "boolconst":
+                parseToken("boolconst", indent)
+            elif tableOfIdent.get(lex, False) == "bool":
+                parseToken("ident", indent)
+            elif lex == '(':
+                parseExpression(indent)
+            else:
+                failParse("неправильний boolexpr",
+                          (numLine, "boolconst або ident(bool)"))
+            return True
+        elif lex == ")" or lex == ";":
+            return True
+        else:
+            failParse("неправильний boolexpr", (numLine, "rel_op"))
+    elif parseArithmExpression(indent):
+        if parseToken("rel_op", indent):
+            numLine, lex, tok = getSymb()
+            if tok in ("intnum", "floatnum") or tableOfIdent.get(lex, False) in ("int", "float"):
+                if tableOfIdent.get(lex, False) in ("intnum", "floatnum"):
+                    parseToken("ident", indent)
+                return parseArithmExpression(indent)
+            elif lex == '(':
+                parseArithmExpression(indent)
+                return True
+            else:
+                failParse('неочікуваний boolexpr',
+                          (numLine, "intnum, floatnum, ident(int, float)"))
+        else:
+            return True
+    else:
+        # error
+        numLine = getSymb()
+        failParse('неочікувані дані', (numLine, "assign statement"))
+
+
+def parseArithmExpression(indent):
+    print("  " * indent + "parseArithmExpression():")
+    indent += 1
+    parseToken("add_op", indent)
+
+    if not parseTerm(indent):
+        return False
+
+    while parseToken("add_op", indent) and parseTerm(indent):
+        pass
+    return True
+
+
+def parseTerm(indent):
+    print("  " * indent + "parseTerm():")
+    indent += 1
+    if not parseChunk(indent):
+        return False
+
+    while parseToken("mult_op", indent) and parseChunk(indent):
+        pass
+    return True
+
+
+def parseChunk(indent):
+    print("  " * indent + "parseChunk():")
+    indent += 1
+    if not parseFactor(indent):
+        return False
+
+    while parseToken("power_op", indent) and parseFactor(indent):
+        pass
+    return True
+
+
+def parseFactor(indent):
+    global tableOfIdent
+    global numRow
+    print("  " * indent + "parseFactor():")
+    indent += 1
+    numLine, lex, tok = getSymb()
+    if tok in ("intnum", "floatnum", "expnum", "boolconst", "ident"):
+        numRow -= 1
+        _numLine, _lex, _tok = getSymb()
+        if _tok in ("mult_op", "power_op", "add_op"):
+            numRow += 1
+            _numLine, _lex, _tok = getSymb()
+            if _tok == "boolconst" or tableOfIdent.get(_lex, False) == "bool":
+                failParse('неочікуваний boolexpr',
+                          (numLine, "intnum, floatnum, ident(int, float)"))
+            else:
+                numRow -= 1
+        numRow += 2
+        if tok == "ident":
+            try:
+                print(
+                    "  " * indent + 'parseToken: В рядку {0} токен {1}'.format(numLine, (lex, tok, tableOfIdent[lex])))
+            except KeyError:
+                failParse("недекларований ідентифікатор", (indent, lex))
+        else:
+            print(
+                "  " * indent + 'parseToken: В рядку {0} токен {1}'.format(numLine, (lex, tok)))
+
+    elif lex == "(":
+        numRow += 1
+        print(
+            "  " * indent + 'В рядку {0} токен {1}'.format(numLine, (lex, tok)))
+        parseExpression(indent)
+        parseToken("brackets_op", indent, ")")
+
+        while parseToken("rel_op", indent):
+            numLine, lex, tok = getSymb()
+            if lex == "!":
+                parseToken("rel_op", indent, "!")
+            parseExpression(indent)
+    elif lex == "!":
+        numRow += 1
+        print(
+            "  " * indent + 'В рядку {0} токен {1}'.format(numLine, (lex, tok)))
+        parseExpression(indent)
+    else:
+        # error
+        numLine = getSymb()
+        failParse('неочікувані дані', (numLine, "assign statement"))
+    return True
+
+
+parseProgram()
