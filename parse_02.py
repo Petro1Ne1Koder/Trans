@@ -1,4 +1,4 @@
-from my_lang_lex import lex, tableOfSymb  # , tableOfVar, tableOfConst
+from Lab.my_lang_lex import lex, tableOfSymb  # , tableOfVar, tableOfConst
 
 lex()
 print('-' * 30)
@@ -21,6 +21,10 @@ tableOfLabel = {}
 # # запуск парсера
 # parseProgram()
 def parseProgram():
+    try:
+        numTabs = 0
+        parseToken('keyword', numTabs, 'program')
+        if not parseToken('ident', numTabs, type="program")
     print('parseProgram():')
     if tableOfSymb:
         while parseStatement():
