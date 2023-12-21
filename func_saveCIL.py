@@ -1,4 +1,4 @@
-from parse_02 import TableOfIdents, postfixCodeCLR
+from Lab.parse_02 import TableOfIdents, postfixCodeCLR
 
 def saveCIL(fileName):
   fname = fileName + ".il"

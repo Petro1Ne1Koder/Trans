@@ -21,10 +21,6 @@ tableOfLabel = {}
 # # запуск парсера
 # parseProgram()
 def parseProgram():
-    try:
-        numTabs = 0
-        parseToken('keyword', numTabs, 'program')
-        if not parseToken('ident', numTabs, type="program")
     print('parseProgram():')
     if tableOfSymb:
         while parseStatement():
@@ -36,14 +32,18 @@ def parseProgram():
     else:
         print('Parser: Синтаксичний аналіз і семантичний аналіз завершився успішно')
 
-
 def parseStatement():
     print('\t\tparseStatement():')
     # прочитаємо поточну лексему в таблиці розбору
     numLine, lex, tok = getSymb()
     # якщо токен - ідентифікатор
     # обробити інструкцію присвоювання
-    if tok == 'ident':
+
+
+    if (lex, tok) == ('program', 'keyword'):
+        parseInit()
+        return True
+    elif tok == 'ident':
         parseSimplestmt()
         return True
     # if tok ==  'ident':
@@ -80,6 +80,14 @@ def parseStatement():
         return False
         
 
+def parseInit():
+    global numRow
+    numTabs = 0
+    print('\t' * 5 + 'parseInit():')
+    parseToken('program', 'keyword', '\t' * 7)
+    if not parseToken('ident', numTabs, 'program'):
+        failParse("відсутній ідентифікатор програми", (numRow, 'program'))
+    return True
 
 def getSymb():
     global numRow

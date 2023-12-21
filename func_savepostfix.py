@@ -1,4 +1,4 @@
-from parse_02 import TableOfIdents, postfixCode
+from Lab.parse_02 import TableOfIdents, postfixCode
 
 def SavePostfixCode(fileName):
     fname = fileName + ".postfix"

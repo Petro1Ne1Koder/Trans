@@ -27,9 +27,7 @@ def parseProgram():
         parseToken('keyword', numTabs, 'program')
         if not parseToken('ident', numTabs, type="program"):
             failParse("відсутній ідентифікатор програми", (numRow, 'program'))
-        parseToken('brackets_op', numTabs, '{')
-
-        parseToken("eol", numTabs, "\n")
+        parseToken('punct', numTabs, '{')
 
         parseDeclarList(numTabs)
         parseToken("eol", numTabs, "\n")
@@ -37,7 +35,7 @@ def parseProgram():
         # перевірити синтаксичну коректність списку інструкцій StatementList
         # parseStatementList()
 
-        parseToken('brackets_op', numTabs, '}')
+        parseToken('punct', numTabs, '}')
 
         # повідомити про синтаксичну коректність програми
         print('Parser: Синтаксичний аналіз завершився успішно')
