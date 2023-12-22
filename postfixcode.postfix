@@ -3,39 +3,79 @@
 
 
 .vars(
+   a   int
+   b   int
+   c   int
    x   float
-   c   float
+   i   int
+   y   bool
 )
 
 
 .labels(
-   m1   20
-   m2   24
+   m1   48
+   m2   50
+   m3   55
+   m4   68
 )
 
 
 .constants(
-   7.5   float
+   2   int
+   5   int
    3   int
-   15   int
+   2   int
+   2   int
+   0   int
+   2   int
+   3   int
+   1   int
 )
 
 
 .code(
-   x   l-val
-   7.5   float
+   a   l-val
+   2   int
    =   assign_op
-   c   l-val
-   x   r-val
+   b   l-val
+   5   int
+   =   assign_op
+   a   l-val
+   a   r-val
    3   int
-   -   add_op
+   +   add_op
    =   assign_op
-   c   l-val
+   a   l-val
    IN   in_op
    =   assign_op
+   b   l-val
+   IN   in_op
+   =   assign_op
+   b   l-val
+   b   r-val
+   2   int
+   *   mul_op
+   =   assign_op
+   a   r-val
+   OUT   out_op
+   b   r-val
+   OUT   out_op
+   a   l-val
+   a   r-val
+   2   int
+   -   add_op
+   =   assign_op
+   x   l-val
+   a   r-val
+   b   r-val
+   ^   pow_op
+   =   assign_op
+   i   l-val
+   0   int
+   =   assign_op
    x   r-val
-   c   r-val
-   <   rel_op
+   2   int
+   >=   rel_op
    m1   label
    JF   jf
    x   r-val
@@ -44,8 +84,24 @@
    JMP   jump
    m1   label
    :   colon
-   15   int
-   OUT   out_op
    m2   label
+   :   colon
+   i   r-val
+   3   int
+   <=   rel_op
+   m3   label
+   :   colon
+   i   l-val
+   i   r-val
+   1   int
+   +   add_op
+   =   assign_op
+   i   r-val
+   OUT   out_op
+   m4   label
+   JF   jf
+   m3   label
+   JMP   jump
+   m4   label
    :   colon
 )
