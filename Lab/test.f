@@ -1,8 +1,8 @@
 program {
-    int a, c;
-    float x, b;
-
-    a = 2;
-    b = 5.5;
-    x = 2.5677;
+    int c, x;
+    x = 5;
+    c = x - 3;
+    while x > c {
+        x = 2;
+    }
 }

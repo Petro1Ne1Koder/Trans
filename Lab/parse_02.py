@@ -766,4 +766,3 @@ print(tableOfLabel)
 print(TableOfIdents)
 print('-' * 30)
 [print(i) for i in postfixCode]
-
