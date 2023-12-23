@@ -1,8 +1,7 @@
 grammar f;
 
-program: 'program' name '{'statement*'}'EOF;
+program: 'program' '{'statement*'}'EOF;
 
-name: Letter (Letter)*;
 statement: varDecl
          | ifStatement
          | loopStatement

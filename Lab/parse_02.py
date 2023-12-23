@@ -23,8 +23,6 @@ tableOfLabel = {}
 def parseProgram():
     print('parseProgram():')
     parseToken('program', 'keyword', '\t')
-    if not parseToken('myprogram', 'ident', '\t'):
-        failParse("відсутній ідентифікатор програми", (numRow, 'program'))
     parseToken('{', 'punct', '\t')
 
     if tableOfSymb:
@@ -625,7 +623,7 @@ def parseWhile():
     return True
 
 
-def parseToken(lexeme, token, indent):
+def parseToken(lexeme, token, indent, type=None):
     # доступ до поточного рядка таблиці розбору
     global numRow
 
