@@ -600,12 +600,13 @@ def parseWhile():
     print('\t' * 5 + 'parseWhile():')
 
     parseToken('while', 'keyword', '\t' * 7)
-    parseCondition()
+    # parseCondition()
 
     m1 = createLabel()
     postfixCode.append(m1)  # Трансляцiя
     postfixCode.append((':', 'colon'))
     postfixCodeCLR.append(f'   brfalse   {m1[0]}')
+    parseCondition()
 
     parseBlock()
 

@@ -15,7 +15,7 @@
 .labels(
    m1   48
    m2   50
-   m3   55
+   m3   52
    m4   68
 )
 
@@ -86,11 +86,11 @@
    :   colon
    m2   label
    :   colon
+   m3   label
+   :   colon
    i   r-val
    3   int
    <=   rel_op
-   m3   label
-   :   colon
    i   l-val
    i   r-val
    1   int

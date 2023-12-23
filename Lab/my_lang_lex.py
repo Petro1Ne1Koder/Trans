@@ -77,36 +77,10 @@ tableOfSymb = {}
 
 state = initState
 
-# f = open('test.f', 'r')
-sourceCode = """program myprogram {
-    int a;
-    int b;
-    int c;
-    float x;
-    int i;
-    bool y;
-
-    a = 2;
-    b = 5;
-    a = a + 3;
-    input(a, b);
-    b = b * 2;
-    output(a, b);
-    a = a -2;
-    // b = b / 2;
-    x = a ^ b;
-    i = 0;
-    if x >= 2 {
-          output(x);
-    }
-    while i <= 3 {
-        i = i + 1;
-        output(i);
-    }
-}"""
-    # = f.read()
+f = open('test.f', 'r')
+sourceCode = f.read()
 sourceCode += '\n'
-# f.close()
+f.close()
 
 FSuccess = (True, 'Lexer')
 
