@@ -1,7 +1,7 @@
 tokenTable = {
     'program': 'keyword',
-    'true': 'keyword',
-    'false': 'keyword',
+    'True': 'keyword',
+    'False': 'keyword',
     'if': 'keyword',
     'else': 'keyword',
     'while': 'keyword',

@@ -17,15 +17,6 @@ class fListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by fParser#name.
-    def enterName(self, ctx:fParser.NameContext):
-        pass
-
-    # Exit a parse tree produced by fParser#name.
-    def exitName(self, ctx:fParser.NameContext):
-        pass
-
-
     # Enter a parse tree produced by fParser#statement.
     def enterStatement(self, ctx:fParser.StatementContext):
         pass

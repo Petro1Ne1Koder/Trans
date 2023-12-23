@@ -22,7 +22,10 @@
     .method private hidebysig static void Main(string[] args) cil managed
     {
     .locals (
-       [0]  int32 a
+       [0]  int32 a,
+       [1]  int32 c,
+       [2]  float32 x,
+       [3]  float32 b
      )
 
    .entrypoint
@@ -30,21 +33,28 @@
    ldloca    a
    ldc.i4     2
    stind.i4
-   ldloca    a
-   ldc.i4     2
-   ldc.i4     2
-   mul
-   ldc.i4     2
-   mul
-   ldc.i4     2
-   mul
-   ldc.i4     2
-   mul
-   stind.i4
+   ldloca    b
+   ldc.r4     5.5
+   stind.r4
+   ldloca    x
+   ldc.r4     2.5677
+   stind.r4
 	ldstr "a = "
 	call void [mscorlib]System.Console::Write(string) 
 	ldloc  a
 	call void [mscorlib]System.Console::WriteLine(int32) 
+	ldstr "c = "
+	call void [mscorlib]System.Console::Write(string) 
+	ldloc  c
+	call void [mscorlib]System.Console::WriteLine(int32) 
+	ldstr "x = "
+	call void [mscorlib]System.Console::Write(string) 
+	ldloc  x
+	call void [mscorlib]System.Console::WriteLine(float32) 
+	ldstr "b = "
+	call void [mscorlib]System.Console::Write(string) 
+	ldloc  b
+	call void [mscorlib]System.Console::WriteLine(float32) 
 	ret    
 }
 }

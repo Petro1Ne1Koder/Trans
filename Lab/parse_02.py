@@ -56,7 +56,10 @@ def parseStatement():
     #     parseExpression()
     # обробка оголошення змінної
     if (lex, tok) == ('int', 'keyword') or (lex, tok) == ('float', 'keyword') or (lex, tok) == ('bool', 'keyword'):
-        parseVar()
+        print('\t' * 7 + 'parseVar():')
+        numRow += 1
+        print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, tok)))
+        while parseVar(lex): pass
         return True
 
 
@@ -362,23 +365,28 @@ def parseFactorforPow():
 
 
 
-def parseVar():
+def parseVar(type=None):
     global numRow
-    print('\t' * 7 + 'parseVar():')
-    numLine, typeIdent, tok = getSymb()
-    print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (typeIdent, tok)))
-    numRow += 1
-    numLine, ident, tok = getSymb()
-    if ident in TableOfIdents:
+    numLine, lex, tok = getSymb()
+    if (tok, lex) == ('punct', ';'):
+        numRow += 1
+        return False
+    elif (tok, lex) == ('punct', ','):
+        numRow += 1
+        return True
+    elif tok != 'ident':
+        failParse('Невiрно задана змiнна у рядку', numLine)
+    if lex in TableOfIdents:
         failParse('Змінна вже оголошена', numLine)
+        return False
     else:
-        print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (ident, tok)))
-        if typeIdent == 'int' or typeIdent == 'float':
-            addToTableOfIdents(ident, typeIdent, 0, numLine)
-        elif typeIdent == 'bool':
-            addToTableOfIdents(ident, typeIdent, False, numLine)
-
+        print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, type)))
+        if type == 'int' or type == 'float':
+            addToTableOfIdents(lex, type, 0, numLine)
+        elif type == 'bool':
+            addToTableOfIdents(lex, type, False, numLine)
     numRow += 1
+    return True
 
 
 def parseSimplestmt():
@@ -528,9 +536,9 @@ def parseIncDecStmt():
         return False
     if ident not in TableOfIdents:
         failParse('неоголошена змінна', numLine)
-    if typeIdent == 'bool':
-        failParse('Змінна типу bool не може використовувати post_op', numLine)
     if tok1 == 'post_op':
+        if typeIdent == 'bool':
+            failParse('Змінна типу bool не може використовувати post_op', numLine)
         print('\t' * 5 + 'parseIncDecStmt():')
         numRow += 1
         print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (ident, tok)))

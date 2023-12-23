@@ -4,6 +4,9 @@
 
 .vars(
    a   int
+   c   int
+   x   float
+   b   float
 )
 
 
@@ -13,8 +16,8 @@
 
 .constants(
    2   int
-   2   int
-   3   int
+   5.5   float
+   2.5677   float
 )
 
 
@@ -22,13 +25,10 @@
    a   l-val
    2   int
    =   assign_op
-   a   l-val
-   a   r-val
-   2   int
-   3   int
-   ^   pow_op
-   ^   pow_op
+   b   l-val
+   5.5   float
    =   assign_op
-   a   r-val
-   OUT   out_op
+   x   l-val
+   2.5677   float
+   =   assign_op
 )

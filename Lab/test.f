@@ -1,4 +1,8 @@
 program {
-    int a, b;
-    a = a * 2 * 2 * 2 * 2;
+    int a, c;
+    float x, b;
+
+    a = 2;
+    b = 5.5;
+    x = 2.5677;
 }

@@ -14,11 +14,6 @@ class fVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by fParser#name.
-    def visitName(self, ctx:fParser.NameContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by fParser#statement.
     def visitStatement(self, ctx:fParser.StatementContext):
         return self.visitChildren(ctx)
