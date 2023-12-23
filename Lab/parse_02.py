@@ -58,8 +58,14 @@ def parseStatement():
     if (lex, tok) == ('int', 'keyword') or (lex, tok) == ('float', 'keyword') or (lex, tok) == ('bool', 'keyword'):
         print('\t' * 7 + 'parseVar():')
         numRow += 1
-        print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, tok)))
-        while parseVar(lex): pass
+        type = lex
+        token = tok
+        lineNum = numLine
+        numLine, lex, tok = getSymb()
+        if lex == ';':
+            failParse('Немає назви змінної в рядку', numLine)
+        print('\t' * 7 + 'в рядку {0} - {1}'.format(lineNum, (type, token)))
+        while parseVar(type): pass
         return True
 
 
@@ -315,6 +321,7 @@ def parseOutput():
         print(numLine, lex, tok)
         numRow += 1
         postfixCode.append(('OUT', 'out_op'))
+        postfixCodeCLR.append('OUT')
         while True:
             parseExpression()
             numLine, lex, tok = getSymb()
@@ -324,6 +331,7 @@ def parseOutput():
                 print(numLine, lex, tok)
                 numRow += 1
                 postfixCode.append(('OUT', 'out_op'))
+                postfixCodeCLR.append('OUT')
 
     parseToken(')', 'brackets_op', '')
     postfixCode.append(('OUT', 'out_op'))
@@ -380,7 +388,7 @@ def parseVar(type=None):
         failParse('Змінна вже оголошена', numLine)
         return False
     else:
-        print('\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, type)))
+        print('\t\t' * 7 + 'в рядку {0} - {1}'.format(numLine, (lex, type)))
         if type == 'int' or type == 'float':
             addToTableOfIdents(lex, type, 0, numLine)
         elif type == 'bool':
@@ -611,7 +619,7 @@ def parseWhile():
     m1 = createLabel()
     postfixCode.append(m1)  # Трансляцiя
     postfixCode.append((':', 'colon'))
-    postfixCodeCLR.append(f'   brfalse   {m1[0]}')
+    postfixCodeCLR.append(f'{m1[0]}:')
     parseCondition()
 
     parseBlock()
@@ -619,11 +627,11 @@ def parseWhile():
     m2 = createLabel()
     postfixCode.append(m2)  # Трансляцiя
     postfixCode.append(('JF', 'jf'))
-    postfixCodeCLR.append(f'   br        {m2[0]}')
+    postfixCodeCLR.append(f'   brfalse   {m2[0]}')
 
     postfixCode.append(m1)  # Трансляцiя
     postfixCode.append(('JMP', 'jump'))
-    postfixCodeCLR.append(f'{m1[0]}:')
+    postfixCodeCLR.append(f'   br        {m2[0]}')
 
     postfixCode.append(m2)  # Трансляцiя
     postfixCode.append((':', 'colon'))

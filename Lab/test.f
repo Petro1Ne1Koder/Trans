@@ -1,8 +1,8 @@
 program {
     int c, x;
-    x = 5;
-    c = x - 3;
-    while x > c {
-        x = 2;
+    x = 3;
+    c = x + 3;
+    if x >= c {
+        x = x - 1;
     }
 }

@@ -18,7 +18,7 @@
 .class private auto ansi beforefieldinit Program
   extends [mscorlib]System.Object
 {
-    
+
     .method private hidebysig static void Main(string[] args) cil managed
     {
     .locals (
@@ -29,19 +29,20 @@
    .entrypoint
    //.maxstack  8
    ldloca    x
-   ldc.i4     5
+   ldc.i4     3
    stind.i4
    ldloca    c
    ldloc     x
    ldc.i4     3
-   sub
+   add
    stind.i4
-   brfalse   m1
    ldloc     x
    ldloc     c
-   cgt
+   brfalse   m1
    ldloca    x
-   ldc.i4     2
+   ldloc     x
+   ldc.i4     1
+   sub
    stind.i4
    br        m2
 m1:
